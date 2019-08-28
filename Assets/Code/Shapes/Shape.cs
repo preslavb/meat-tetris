@@ -1,98 +1,140 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace Code
 {
     public class Shape
     {
-        
-        // The definitions for shapes (TODO: Ideally move this to a JSON)
-        public static readonly Dictionary<Shapes, byte[,]> Definitions = new Dictionary<Shapes, byte[,]>
+
+        // Get the shape definition from the json file
+        public static List<List<List<bool>>> GetShapeFromJSON(Shapes newShapeEnum)
         {
-            {
-                Shapes.S,
-                new byte[2, 3]
-                {
-                    {0, 1, 1},
-                    {1, 1, 0}
-                }
-            },
-            {
-                Shapes.Box,
-                new byte[2, 2]
-                {
-                    {1, 1},
-                    {1, 1}
-                }
-            },
-            {
-                Shapes.L,
-                new byte[2, 3]
-                {
-                    {0, 0, 1},
-                    {1, 1, 1}
-                }
-            },
-            {
-                Shapes.Long,
-                new byte[4, 1]
-                {
-                    {1},
-                    {1},
-                    {1},
-                    {1}
-                }
-            },
-            {
-                Shapes.T,
-                new byte[2, 3]
-                {
-                    {1, 1, 1},
-                    {0, 1, 0}
-                }
-            },
-            {
-                Shapes.Z,
-                new byte[2, 3]
-                {
-                    {1, 1, 0},
-                    {0, 1, 1}
-                }
-            },
-            {
-                Shapes.ReverseL,
-                new byte[2, 3]
-                {
-                    {1, 0, 0},
-                    {1, 1, 1}
-                }
-            }
-        };
-        
-        
-        // The constructor takes a shape enum, and generates the definition for the shape
-        public Shape(Shapes shapeEnum)
-        {
-            GenerateShape(shapeEnum);
+            string jsonString = Resources.Load<TextAsset>("definitions").text;
+
+            // Create the jobject
+            JObject jObject = JObject.Parse(jsonString);
+
+            // Find the definition of the shape
+            var shape = jObject[newShapeEnum.ToString()];
+
+            return shape.ToObject<List<List<List<bool>>>>();
         }
         
-        // The definition of the shape
-        public byte[,] State { get; private set; }
+        // The constructor takes a shape enum, and generates the definition for the shape
+        public Shape(Shapes shapeEnum, int rotation = 0)
+        {
+            GenerateShape(shapeEnum, rotation);
+        }
+        
+        // The absolute definition of this shape
+        private List<List<List<bool>>> absoluteDefinition;
+        
+        // The definition of the shape at its current rotation
+        public List<List<bool>> State { get; private set; }
+        
+        // The rotation of the shape
+        public int Rotation = 0;
+        
+        // The index at which the shape starts, minding its current rotation
+        public int LeftEdge
+        {
+            get
+            {
+                // Store the last checked inaccurate index
+                var lastEmptyIndex = 0;
+
+                for (int xIndex = 0; xIndex < State[0].Count; xIndex++)
+                {
+                    // Column filled boxes
+                    var filledBoxes = 0;
+                    
+                    // Go through the columns to see if there are any filled ones
+                    for (int yIndex = 0; yIndex < State.Count; yIndex++)
+                    {
+                        filledBoxes += State[yIndex][xIndex] ? 1 : 0;
+                    }
+                    
+                    // If there are no filled boxes, this is not the left edge of the shape
+                    if (filledBoxes == 0)
+                    {
+                        lastEmptyIndex++;
+                    }
+
+                    // Otherwise, this is the edge of the shape
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                return lastEmptyIndex;
+            }
+        }
+
+        // The index at which the shape ends, minding its current rotation
+        public int RightEdge
+        {
+            get
+            {
+                // Store the last checked inaccurate index
+                var lastEmptyIndex = State[0].Count;
+
+                for (int xIndex = State[0].Count - 1; xIndex >= 0; xIndex--)
+                {
+                    // Column filled boxes
+                    var filledBoxes = 0;
+
+                    // Go through the columns to see if there are any filled ones
+                    for (int yIndex = 0; yIndex < State.Count; yIndex++)
+                    {
+                        filledBoxes += State[yIndex][xIndex] ? 1 : 0;
+                    }
+
+                    // If there are no filled boxes, this is not the right edge of the shape
+                    if (filledBoxes == 0)
+                    {
+                        lastEmptyIndex--;
+                    }
+
+                    // Otherwise, this is the edge of the shape
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                return lastEmptyIndex;
+            }
+        }
+        
+        // The width of the shape
+        public int Width => State[0].Count;
+        
+        // The height of the shape
+        public int Height => State.Count;
         
         // Generate the correct state for the given shape
-        private void GenerateShape(Shapes newShapeEnum)
+        private void GenerateShape(Shapes newShapeEnum, int rotation)
         {
-
+            // Get the absolute definition
+            absoluteDefinition = GetShapeFromJSON(newShapeEnum);
             
-            var definitionRequired = Definitions[newShapeEnum];
+            // Get the actual state
+            var actualShape = absoluteDefinition[rotation];
             
             // Initialize the state with the same dimensions
-            State = new byte[definitionRequired.GetLength(0), definitionRequired.GetLength(1)];
+            State = new List<List<bool>>(4);
 
-            for (int i = 0; i < definitionRequired.GetLength(0); i++)
+            for (int i = 0; i < actualShape.Count; i++)
             {
-                for (int j = 0; j < definitionRequired.GetLength(1); j++)
+                State.Insert(i, new List<bool>(4));
+                
+                for (int j = 0; j < actualShape[i].Count; j++)
                 {
-                    State[i, j] = definitionRequired[i, j];
+                    State[i].Insert(j, actualShape[i][j]);
                 }
             }
         }
