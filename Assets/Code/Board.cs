@@ -1,11 +1,16 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Code
 {
     public class Board
     {
+        [OdinSerialize]
+        [ListDrawerSettings(Expanded = true, IsReadOnly = true)]
         public List<List<bool>> Representation { get; private set; }
 
         public Board(int sizeX, int sizeY)
@@ -22,6 +27,24 @@ namespace Code
                     Representation[i].Insert(j, false);
                 }
             }
+        }
+        
+        // Clear the bottom row
+        public void ClearRow(int rowIndex)
+        {
+            // Substitute all values with the one above them (basically moving everything down)
+            for (int row = rowIndex; row >= 0; row--)
+            {
+                for (int i = 0; i < Representation[rowIndex].Count; i++)
+                {
+                    // The value above the current cell (default to 0 if at the top)
+                    var valueAbove = row > 0 ? Representation[row - 1][i] : false;
+                    
+                    // Substitute with the value above
+                    Representation[row][i] = valueAbove;
+                }
+            }
+            
         }
         
         // Insert a block at the given coordinate
@@ -56,7 +79,7 @@ namespace Code
                 // If the boxes in the row are equal to the possible boxes in the row, that means its full
                 if (filledBoxes == Representation[i].Count)
                 {
-                    // Add the row to the indeces
+                    // Add the row to the indexes
                     matchingRows.Add(i);
                 }
             }
