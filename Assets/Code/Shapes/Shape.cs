@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = System.Random;
 
 namespace Code
 {
@@ -23,16 +25,34 @@ namespace Code
             return shape.ToObject<List<List<List<bool>>>>();
         }
         
+        // Generate a random shape and return it
+        public static Shape GenerateRandomShape(Random rng, int rotation = 0)
+        {
+            
+            // Get the amount of possible shapes
+            var shapesLength = Enum.GetNames(typeof(Shapes)).Length;
+            
+            // Get a random shape enum
+            var enumIndex = rng.Next(0, shapesLength);
+            
+            return new Shape((Shapes)enumIndex, rotation);
+        }
+        
         // The constructor takes a shape enum, and generates the definition for the shape
         public Shape(Shapes shapeEnum, int rotation = 0)
         {
+            _currentShape = shapeEnum;
             GenerateShape(shapeEnum, rotation);
         }
+        
+        // The current shape
+        private Shapes _currentShape;
         
         // The absolute definition of this shape
         private List<List<List<bool>>> absoluteDefinition;
         
         // The definition of the shape at its current rotation
+        [ShowInInspector]
         public List<List<bool>> State { get; private set; }
         
         // The rotation of the shape
@@ -137,6 +157,14 @@ namespace Code
                     State[i].Insert(j, actualShape[i][j]);
                 }
             }
+        }
+        
+        // Rotate the shape
+        public void RotateBy(int rotations)
+        {
+            Rotation = (Rotation + rotations) % 4;
+            
+            GenerateShape(_currentShape, Rotation);
         }
     }
 }

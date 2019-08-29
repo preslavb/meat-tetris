@@ -19,5 +19,11 @@ namespace DefaultNamespace
         {
             managers.ForEach(manager => manager.Value.Setup());
         }
+        
+        // Update the managers
+        private void Update()
+        {
+            managers.ForEach(manager => manager.Value.Update());
+        }
     }
 }

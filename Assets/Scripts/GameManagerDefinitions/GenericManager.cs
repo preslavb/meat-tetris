@@ -11,5 +11,8 @@ namespace DefaultNamespace.GameManagerDefinitions
         
         // Set up the manager
         public abstract void Setup();
+        
+        // Update logic
+        public virtual void Update() {}
     }
 }

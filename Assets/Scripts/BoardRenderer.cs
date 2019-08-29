@@ -10,18 +10,36 @@ public class BoardRenderer : SerializedMonoBehaviour
     
     // The instance of the board manager
     [ShowInInspector]
+    [OdinSerialize] 
     private BoardManager _boardManager;
     
     // The list of cage assets
     [OdinSerialize]
-    [PreviewField]
+    [PreviewField(alignment: ObjectFieldAlignment.Left)]
+    [AssetsOnly]
     private List<GameObject> _cageAssets = new List<GameObject>(4);
+
+    [OdinSerialize]
+    [AssetsOnly] 
+    private GameObject ShapePrefab;
+
+    [OdinSerialize]
+    [SceneObjectsOnly]
+    private Transform SpawnPoint;
+
+    [OdinSerialize]
+    public (int, int) GridSize;
+    
+    // The currently controlled shape
     
     // On start, render the board on screen
     private void Start()
     {
-        // DEBUG: Test the rendering 
-        _boardManager.Board.InsertBlockAt(7, 9);
+        // Create a shape for the next board shape
+        var newShapeView = Instantiate(ShapePrefab);
+        
+        // Initialize shape prefab
+        ShapePrefab.GetComponent<ShapeView>().Initialize(_boardManager.CurrentShape, SpawnPoint);
     }
     
     // Render the board
