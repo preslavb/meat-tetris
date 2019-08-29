@@ -58,6 +58,10 @@ namespace Code
         {
             Representation[y][x] = false;
         }
+
+        [ReadOnly]
+        [ShowInInspector]
+        private int[] MatchingRowsDebug => GetMatchingRows();
         
         // Get the indeces of the rows which have matches
         public int[] GetMatchingRows()

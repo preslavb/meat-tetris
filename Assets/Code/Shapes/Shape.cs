@@ -59,6 +59,7 @@ namespace Code
         public int Rotation = 0;
         
         // The index at which the shape starts, minding its current rotation
+        [ShowInInspector]
         public int LeftEdge
         {
             get
@@ -95,6 +96,7 @@ namespace Code
         }
 
         // The index at which the shape ends, minding its current rotation
+        [ShowInInspector]
         public int RightEdge
         {
             get

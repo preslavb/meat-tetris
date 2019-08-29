@@ -35,11 +35,18 @@ public class BoardRenderer : SerializedMonoBehaviour
     // On start, render the board on screen
     private void Start()
     {
+        CreateNewShapeView();
+        _boardManager.ShapeDoneDropping += CreateNewShapeView;
+    }
+    
+    // Create a new shape view
+    private void CreateNewShapeView()
+    {
         // Create a shape for the next board shape
         var newShapeView = Instantiate(ShapePrefab);
-        
+
         // Initialize shape prefab
-        ShapePrefab.GetComponent<ShapeView>().Initialize(_boardManager.CurrentShape, SpawnPoint);
+        newShapeView.GetComponent<ShapeView>().Initialize(_boardManager.CurrentShape, SpawnPoint);
     }
     
     // Render the board
