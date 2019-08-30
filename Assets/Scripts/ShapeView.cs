@@ -5,6 +5,7 @@ using Code;
 using DefaultNamespace.GameManagerDefinitions;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class ShapeView : MonoBehaviour
@@ -26,6 +27,13 @@ public class ShapeView : MonoBehaviour
     // Whether this shape is relevant
     [NonSerialized]
     private bool _isRelevant = true;
+    
+    // Whether this shape is rotating
+    [NonSerialized]
+    private bool _isRotating = true;
+    
+    // The rotation of the shape view
+    private int _rotation = 0;
 
     // The list of cage assets
     [SerializeField]
@@ -95,24 +103,40 @@ public class ShapeView : MonoBehaviour
         {
             for (int yIndex = 0; yIndex < _shape.State.Count; yIndex++)
             {
-//                if (_cages[yIndex][xIndex] == null)
-//                    continue;
-//                
-//                // Check left
-//                if (xIndex - 1 >= 0 && _cages[yIndex][xIndex - 1] != null)
-//                {
-//                    var cage = _cages[yIndex][xIndex];
-//                    
-//                    cage.transform.Find("ColliderLeft").gameObject.SetActive(false);
-//                }
-//
-//                // Check right
-//                if (xIndex + 1 < _shape.Width && _cages[yIndex][xIndex + 1] != null)
-//                {
-//                    var cage = _cages[yIndex][xIndex];
-//
-//                    cage.transform.Find("ColliderRight").gameObject.SetActive(false);
-//                }
+                if (_cages[yIndex][xIndex] == null)
+                    continue;
+                
+                // Check left
+                if (xIndex - 1 >= 0 && _cages[yIndex][xIndex - 1] != null)
+                {
+                    var cage = _cages[yIndex][xIndex];
+                    
+                    cage.transform.Find("ColliderLeft").gameObject.SetActive(false);
+                }
+
+                // Check right
+                if (xIndex + 1 < _shape.Width && _cages[yIndex][xIndex + 1] != null)
+                {
+                    var cage = _cages[yIndex][xIndex];
+
+                    cage.transform.Find("ColliderRight").gameObject.SetActive(false);
+                }
+                
+                // Check up
+                if (yIndex - 1 >= 0 && _cages[yIndex - 1][xIndex] != null)
+                {
+                    var cage = _cages[yIndex][xIndex];
+                    
+                    cage.transform.Find("ColliderTop").gameObject.SetActive(false);
+                }
+
+                // Check down
+                if (yIndex + 1 < _shape.Height && _cages[yIndex + 1][xIndex] != null)
+                {
+                    var cage = _cages[yIndex][xIndex];
+
+                    cage.transform.Find("ColliderBottom").gameObject.SetActive(false);
+                }
             }
         }
     }
@@ -126,12 +150,56 @@ public class ShapeView : MonoBehaviour
     // Rotate the shape
     private void RotateShape(int rotateBy)
     {
-        gameObject.transform.Rotate(0, 0, -90);
+        //gameObject.transform.Rotate(0, 0, -90);
+        
+        // Check if there is already a rotation happening and if so, interrupt it and rotate immediately
+        if (_isRotating)
+        {
+            StopCoroutine(RotateShapeCoroutine(0.5f));
+            
+            gameObject.transform.rotation = Quaternion.Euler(0, 0, _rotation * -90);
+
+            StartCoroutine(RotateShapeCoroutine(0.5f));
+        }
+
+        else
+        {
+            StartCoroutine(RotateShapeCoroutine(0.5f));
+        }
+
+        _rotation++;
+    }
+    
+    // Rotate shape coroutine
+    private IEnumerator RotateShapeCoroutine(float time)
+    {
+        // Notify the rotation
+        _isRotating = true;
+        
+        // Cache the rigidbody2d
+        var rigidbody2d = GetComponent<Rigidbody2D>();
+        
+        // Track the time
+        var countdown = 0f;
+
+        while (countdown < time)
+        {
+            var fraction = countdown / time;
+            
+            rigidbody2d.MoveRotation(Mathf.Lerp(rigidbody2d.rotation, _rotation * -90, fraction));
+            
+            yield return new WaitForFixedUpdate();
+
+            countdown += Time.fixedDeltaTime;
+        }
+
+        _isRotating = false;
     }
     
     // Drop the shape
     private void DropShape()
     {
+        gameObject.GetComponent<Rigidbody2D>().constraints = gameObject.GetComponent<Rigidbody2D>().constraints | RigidbodyConstraints2D.FreezeRotation;
         gameObject.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
     }
 

@@ -13,6 +13,7 @@
             <e p="Shapes.cs" t="Include" />
           </e>
         </e>
+        <e p="EyeSpriteController.cs" t="Include" />
         <e p="MeatTetris.asmdef" t="Include" />
         <e p="Plugins" t="Include">
           <e p="Newtonsoft.Json.xml" t="Include" />
@@ -48,13 +49,17 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
+          <e p="BlockSelector.cs" t="Include" />
           <e p="BoardRenderer.cs" t="Include" />
           <e p="GameManager.cs" t="Include" />
           <e p="GameManagerDefinitions" t="Include">
             <e p="BoardManager.cs" t="Include" />
             <e p="GenericManager.cs" t="Include" />
             <e p="ManagerType.cs" t="Include" />
+            <e p="RandomManager.cs" t="Include" />
           </e>
+          <e p="GrinderScript.cs" t="Include" />
+          <e p="ShapeView.cs" t="Include" />
         </e>
         <e p="setupignores.cs" t="Include" />
         <e p="Tests" t="Include">
