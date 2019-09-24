@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using Code;
 using DefaultNamespace.GameManagerDefinitions;
 using Sirenix.OdinInspector;
-using Sirenix.Serialization;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class ShapeView : MonoBehaviour
@@ -26,7 +24,7 @@ public class ShapeView : MonoBehaviour
     
     // Whether this shape is relevant
     [NonSerialized]
-    private bool _isRelevant = true;
+    public bool _isRelevant = true;
     
     // Whether this shape is rotating
     [NonSerialized]
@@ -220,6 +218,12 @@ public class ShapeView : MonoBehaviour
             
             // Reenable the Board manager
             BoardManager.Enable();
+        }
+
+        else if ((other.gameObject.CompareTag("Floor") || other.gameObject.CompareTag("Box")) && !_isRelevant)
+        {
+            gameObject.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+            gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
         }
     }
 }

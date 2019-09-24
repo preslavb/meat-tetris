@@ -16,8 +16,12 @@ namespace DefaultNamespace
         public GameObject selectorPrefab;
         
         // The spawn point
-        [SceneObjectsOnly]
-        public GameObject spawnPoint;
+        public GameObject spawnPoint => GameObject.Find("SpawnPoint");
+
+        private void OnEnable()
+        {
+            //spawnPoint = GameObject.Find("SpawnPoint");
+        }
 
         // Select the block at the specified location
         public GameObject GetBoxAtCoords(int x, int y)
@@ -46,7 +50,7 @@ namespace DefaultNamespace
 
             var boxFound = collider2Ds.Count > 0 ? collider2Ds[0].transform.parent : null;
             
-            Destroy(tempSelector);
+            //Destroy(tempSelector);
             
             // Get the first contact and return the object
             return boxFound == null ? null : boxFound.gameObject;

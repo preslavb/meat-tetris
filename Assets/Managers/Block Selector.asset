@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectorPrefab: {fileID: 610504206606179543, guid: fb26bc1df1452274ca480fe9ddab6de4,
     type: 3}
-  spawnPoint: {fileID: 0}
+  spawnPoint: {fileID: 6378205270377435867, guid: b67fe2482add3744f96d9c79ecdd30be,
+    type: 3}

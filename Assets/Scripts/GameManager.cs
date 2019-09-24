@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DefaultNamespace.GameManagerDefinitions;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,6 +13,7 @@ namespace DefaultNamespace
     {
         
         // The array of submanagers (assigned in Unity)
+        [OdinSerialize]
         public Dictionary<ManagerType, GenericManager> managers;
         
         // Initialize the managers

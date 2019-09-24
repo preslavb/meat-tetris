@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DefaultNamespace;
 using DefaultNamespace.GameManagerDefinitions;
 using Sirenix.OdinInspector;
@@ -19,6 +20,10 @@ public class BoardRenderer : SerializedMonoBehaviour
     [ShowInInspector]
     private BlockSelector _blockSelector;
 
+    [OdinSerialize]
+    [ShowInInspector]
+    private RandomManager _randomManager;
+
     [OdinSerialize] 
     [SceneObjectsOnly] 
     [ShowInInspector]
@@ -28,7 +33,12 @@ public class BoardRenderer : SerializedMonoBehaviour
     [SceneObjectsOnly] 
     [ShowInInspector]
     private GameObject pusher;
-    
+
+    [OdinSerialize]
+    [AssetsOnly] 
+    [ShowInInspector]
+    private List<Sprite> goreSprites;
+
     // The list of cage assets
     [OdinSerialize]
     [PreviewField(alignment: ObjectFieldAlignment.Left)]
@@ -87,5 +97,49 @@ public class BoardRenderer : SerializedMonoBehaviour
         
         // Disable the cutter
         cutter.SetActive(false);
+    }
+    
+    // Smash the boxes
+    public void Smash()
+    {
+        // Get all the shapes on the screen
+        var shapes = GameObject.FindObjectsOfType<ShapeView>();
+
+        shapes = shapes.Where(shapeView => !shapeView._isRelevant).ToArray();
+        
+        // Get all of the boxes in the shapes
+        var boxes = shapes.Select(shape => shape.transform).SelectMany(shape => shape.Cast<Transform>().Select(child => child)).ToArray();
+        var boxCount = boxes.Length;
+
+        // Arrange the boxes when the event fires
+        StartCoroutine(SmashCoroutine(boxes, boxCount));
+    }
+
+    private IEnumerator SmashCoroutine(Transform[] boxes, int count)
+    {
+        yield return new WaitForSeconds(0.334f);
+
+        var size = 7.25f;
+
+        for (int i = 0; i < count; i++)
+        {
+            var row = 9 - Mathf.Floor(i / 9);
+
+            var position = SpawnPoint.position + new Vector3(size / 2, -size / 2) + new Vector3(0, -size * 2);
+            
+            position += new Vector3((i % 8) * size, - row * size);
+
+            boxes[i].position = position;
+            
+            if (boxes[i].GetComponentInChildren<EyeSpriteController>() == null)
+                continue;
+
+            var gore = boxes[i].Find("Gore");
+
+            gore.gameObject.SetActive(true);
+            gore.GetComponent<SpriteRenderer>().sprite = goreSprites[_randomManager.Random.Next(0, goreSprites.Count)];
+            gore.rotation = Quaternion.identity;
+            Destroy(boxes[i].GetComponentInChildren<EyeSpriteController>()?.gameObject);
+        }
     }
 }
